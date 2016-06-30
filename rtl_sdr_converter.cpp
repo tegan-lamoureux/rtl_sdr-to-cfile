@@ -14,8 +14,7 @@
 #include <cstring>
 #include <fstream>
 
-// TODO: - Update to handle pipe input/output (for compatibility with fifo), and
-//         POSIX switches and convention.
+// TODO: - Update to handle pipe input/output (for compatibility with fifo).
 
 using namespace std;
 
@@ -28,15 +27,15 @@ int main(int argc, char *argv[])
     ifstream infile;   // Source file stream.
     ofstream outfile;  // Destination file stream.
 
-    char * raw_data = new char[BUFF_SIZE]; // My temp read buffer.
-    float i = 0.0f, q = 0.0f; // My result containers (post-conversion).
-    bool skip_conversion = false; // If true, skip conversion.
-
     if(argc != 3) // Check for proper usage, display error and exit if not.
     {
         cout << "Usage: " << argv[0] << " <input_file> <output_file>" << endl;
         return 1;
     }
+
+    char * raw_data = new char[BUFF_SIZE]; // My temp read buffer.
+    float i = 0.0f, q = 0.0f; // My result containers (post-conversion).
+    bool skip_conversion = false; // If true, skip conversion.
 
     infile.open(argv[2]); // Test open output file.
 
@@ -55,13 +54,14 @@ int main(int argc, char *argv[])
 
     // Open my input and output files in binary mode.
     infile.open(argv[1], ios::binary);
-    outfile.open(argv[2], ios::binary | ios::trunc);
 
-    if(infile && outfile && !skip_conversion)
+    if(infile && !skip_conversion)
     {
+        outfile.open(argv[2], ios::binary | ios::trunc);
+
         // Read two bytes at a time (the in-phase and quadrature component of
         // a single sample, I and Q).
-        while(infile.read(raw_data, BUFF_SIZE))
+        while(infile.read(raw_data, BUFF_SIZE) && outfile)
         {
             // Conversion steps:
             // 1. Deinterleave. Read two bytes (one sample) at a time.
